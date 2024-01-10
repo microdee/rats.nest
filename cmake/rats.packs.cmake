@@ -38,33 +38,51 @@
     )
 ]]#
 
+### options
+
+option(PACKS_AS_STATIC "When ON, compile rats pack libraries STATIC" ON)
+option(PACKS_AS_SHARED "When ON, compile rats pack libraries SHARED" OFF)
+
+if(${PACKS_AS_STATIC} AND ${PACKS_AS_SHARED})
+    message(WARNING "Both PACKS_AS_STATIC and PACKS_AS_SHARED are set to true. Using STATIC")
+    set(PACKS_AS_STATIC ON)
+    set(PACKS_AS_SHARED OFF)
+endif()
+
+if(${PACKS_AS_STATIC})
+    set(RATS_PACK_TYPE "STATIC" CACHE INTERNAL "" FORCE)
+elseif(${PACKS_AS_SHARED})
+    set(RATS_PACK_TYPE "SHARED" CACHE INTERNAL "" FORCE)
+endif()
+
 ### project model preparation
 
-function(get_rats_root CURRENT_DIR)
-    cmake_path(IS_ABSOLUTE CURRENT_DIR CURRENT_DIR_ABSOLUTE)
-    if(NOT ${CURRENT_DIR_ABSOLUTE})
-        message(FATAL_ERROR "Cannot find rats root from relative path ${CURRENT_DIR}")
+function(get_rats_root currentDir)
+    cmake_path(IS_ABSOLUTE currentDir __absCurrDir)
+    if(${__absCurrDir} STREQUAL "")
+        message(FATAL_ERROR "Cannot find rats root from relative path ${currentDir}")
         return()
     endif()
 
-    cmake_path(GET CURRENT_DIR ROOT_PATH CURRENT_DIR_ROOT)
-    if(${CURRENT_DIR} STREQUAL ${CURRENT_DIR_ROOT})
+    cmake_path(GET currentDir ROOT_PATH __currDirRoot)
+    if(${currentDir} STREQUAL ${__currDirRoot})
         message(FATAL_ERROR "Cannot find rats root. Rats packs need a common project root")
         return()
     endif()
 
-    set(RATS_TEMP ${CURRENT_DIR}/.rats CACHE INTERNAL ".rats temporary folder" FORCE)
+    set(RATS_TEMP ${currentDir}/.rats CACHE INTERNAL ".rats temporary folder" FORCE)
     if(EXISTS ${RATS_TEMP})
-        set(RATS_ROOT ${CURRENT_DIR} CACHE INTERNAL "rats project root folder" FORCE)
+        set(RATS_ROOT ${currentDir} CACHE INTERNAL "rats project root folder" FORCE)
     else()
-        cmake_path(GET CURRENT_DIR PARENT_PATH NEXT_PARENT_DIR)
-        get_rats_root(${NEXT_PARENT_DIR})
+        cmake_path(GET currentDir PARENT_PATH __nextParentDir)
+        get_rats_root(${__nextParentDir})
     endif()
 endfunction()
 
-if(NOT ${RATS_ROOT})
+if(NOT ${RATS_INITIALIZED})
+
     message(STATUS "Looking for rats project root.")
-    get_rats_root(${CMAKE_CURRENT_LIST_DIR})
+    get_rats_root(${CMAKE_CURRENT_SOURCE_DIR})
     set(RATS_INTERMEDIATE ${RATS_ROOT}/intermediate CACHE INTERNAL "" FORCE)
     set(RATS_CMAKE_BIN ${RATS_INTERMEDIATE}/cmake/bin CACHE INTERNAL "" FORCE)
     set(RATS_BIN ${RATS_ROOT}/bin CACHE INTERNAL "" FORCE)
@@ -72,9 +90,7 @@ if(NOT ${RATS_ROOT})
     message(STATUS "    intermediate folder is    ${RATS_INTERMEDIATE}")
     message(STATUS "    cmake binaries folder is  ${RATS_CMAKE_BIN}")
     message(STATUS "    output binaries folder is ${RATS_BIN}")
-endif()
 
-if(NOT ${RATS_PACKS_DISCOVERED})
     message(STATUS "\nSearching for rats packs\n")
 
     # Look for all CMake projects in the packs folder
@@ -86,83 +102,82 @@ if(NOT ${RATS_PACKS_DISCOVERED})
         ${RATS_ROOT}/packs/*CMakeLists.txt
     )
 
-    foreach(RATS_PACK ${RATS_PACKS})
-        cmake_path(GET ${RATS_PACK} PARENT_PATH RATS_PACK_DIR)
-        cmake_path(GET ${RATS_PACK_DIR} FILENAME RATS_PACK_NAME)
+    foreach(__ratsPack ${RATS_PACKS})
+        cmake_path(GET __ratsPack PARENT_PATH __ratsPackDir)
+        cmake_path(GET __ratsPackDir FILENAME __ratsPackName)
 
         # Ignore current CMake project if it's already inside the subtree of another one.
         # assuming that other one brings that in already, or that it is privately dependent
         # on the current one.
-        set(IS_INTERNAL_LISTFILE FALSE)
-        cmake_path(GET ${RATS_PACK_DIR} PARENT_PATH CURRENT_INTERNALITY_CHECK_DIR)
-        while(NOT ${CURRENT_INTERNALITY_CHECK_DIR} STREQUAL ${RATS_ROOT}/packs)
-            if (EXISTS ${CURRENT_INTERNALITY_CHECK_DIR}/CMakeLists.txt)
-                message(DEBUG "Ignoring ${RATS_PACK} as it's already in the subtree of other CMake project (${CURRENT_INTERNALITY_CHECK_DIR})")
-                set(IS_INTERNAL_LISTFILE TRUE PARENT_SCOPE)
+        set(__isInternalListFile FALSE)
+        cmake_path(GET __ratsPackDir PARENT_PATH __internalityCheckDir)
+        while(NOT ${__internalityCheckDir} STREQUAL ${RATS_ROOT}/packs)
+            if (EXISTS ${__internalityCheckDir}/CMakeLists.txt)
+                message(DEBUG "Ignoring ${__ratsPack} as it's already in the subtree of other CMake project (${__internalityCheckDir})")
+                set(__isInternalListFile TRUE)
                 break()
             endif()
-            cmake_path(GET ${CURRENT_INTERNALITY_CHECK_DIR} PARENT_PATH CURRENT_INTERNALITY_CHECK_DIR)
+            cmake_path(GET __internalityCheckDir PARENT_PATH __internalityCheckDir)
         endwhile()
-        if(${IS_INTERNAL_LISTFILE})
+        if(${__isInternalListFile})
             continue()
         endif()
 
         # Create variables associated with a unique pack name
-        if(${RATS_PACK_DIR})
-            message(DEBUG "Found pack: ${RATS_PACK_NAME} (at ${RATS_PACK_DIR})")
-            if(${RATS_PACK_${RATS_PACK_NAME}_NAME})
-                message(FATAL_ERROR "Conflicting rats packs: ${RATS_PACK_${RATS_PACK_NAME}_DIR} vs ${RATS_PACK_DIR}")
-                return()
+        message(DEBUG "Found pack: ${__ratsPackName} (at ${__ratsPackDir})")
+        if(${RATS_PACK_${__ratsPackName}_NAME})
+            if (NOT ${RATS_PACK_${__ratsPackName}_DIR} STREQUAL ${__ratsPackDir})
+                message(WARNING "Conflicting rats packs: ${RATS_PACK_${__ratsPackName}_DIR} vs ${__ratsPackDir}, last one will be used.")
             endif()
-            set(RATS_PACK_${RATS_PACK_NAME}_DIR ${RATS_PACK_DIR} CACHE INTERNAL "" FORCE)
-            set(RATS_PACK_${RATS_PACK_NAME}_NAME ${RATS_PACK_NAME} CACHE INTERNAL "" FORCE)
         endif()
+        set(RATS_PACK_${__ratsPackName}_DIR ${__ratsPackDir} CACHE INTERNAL "" FORCE)
+        set(RATS_PACK_${__ratsPackName}_NAME ${__ratsPackName} CACHE INTERNAL "" FORCE)
     endforeach()
 endif()
-
-set(RATS_PACKS_DISCOVERED TRUE CACHE BOOL "Don't set this manually" FORCE)
+set(RATS_INITIALIZED TRUE CACHE BOOL "Don't set this manually" FORCE)
 
 ### Public API
 
 function(add_packs)
     cmake_parse_arguments(PARSE_ARGV 0
-        ADD_PACKS
+        __args
+        ""
         "TARGET"
         "PACKS;PACKS_PUBLIC;PACKS_PRIVATE;PACKS_INTERFACE"
-        ${ARGN}
     )
     
     function(boilerplate)
         cmake_parse_arguments(PARSE_ARGV 0
-            BOILERPLATE
+            __boilerplate
+            ""
             "ACTION"
             "PACKS"
-            ${ARGN}
         )
-        foreach(RATS_PACK_NAME ${BOILERPLATE_PACKS})
-            if(NOT ${RATS_PACK_${RATS_PACK_NAME}_NAME})
-                message(FATAL_ERROR "Specified rats pack: ${RATS_PACK_NAME} doesn't exist")
+        foreach(__ratsPackName ${__boilerplate_PACKS})
+            message(STATUS ${__ratsPackName})
+            if(NOT DEFINED RATS_PACK_${__ratsPackName}_NAME)
+                message(FATAL_ERROR "Specified rats pack: ${__ratsPackName} doesn't exist")
                 return()
             endif()
-            add_subdirectory(${RATS_PACK_${RATS_PACK_NAME}_DIR} ${RATS_CMAKE_BIN}/RATS_PACK_NAME)
-            if(${BOILERPLATE_ACTION})
-                cmake_language(EVAL CODE ${BOILERPLATE_ACTION})
+            add_subdirectory(${RATS_PACK_${__ratsPackName}_DIR} ${RATS_CMAKE_BIN}/${__ratsPackName})
+            if(NOT ${__boilerplate_ACTION} STREQUAL "")
+                cmake_language(EVAL CODE ${__boilerplate_ACTION})
             endif()
         endforeach()
     endfunction()
-    boilerplate(PACKS ${ADD_PACKS_PACKS})
-    if(${ADD_PACKS_TARGET})
+    boilerplate(PACKS ${__args_PACKS})
+    if(NOT ${__args_TARGET} STREQUAL "")
         boilerplate(
-            PACKS ${ADD_PACKS_PACKS_PUBLIC}
-            ACTION "target_link_libraries(${ADD_PACKS_TARGET} PUBLIC \${RATS_PACK_NAME})"
+            PACKS ${__args_PACKS_PUBLIC}
+            ACTION "target_link_libraries(${__args_TARGET} PUBLIC \${__ratsPackName})"
         )
         boilerplate(
-            PACKS ${ADD_PACKS_PACKS_PRIVATE}
-            ACTION "target_link_libraries(${ADD_PACKS_TARGET} PRIVATE \${RATS_PACK_NAME})"
+            PACKS ${__args_PACKS_PRIVATE}
+            ACTION "target_link_libraries(${__args_TARGET} PRIVATE \${__ratsPackName})"
         )
         boilerplate(
-            PACKS ${ADD_PACKS_PACKS_INTERFACE}
-            ACTION "target_link_libraries(${ADD_PACKS_TARGET} INTERFACE \${RATS_PACK_NAME})"
+            PACKS ${__args_PACKS_INTERFACE}
+            ACTION "target_link_libraries(${__args_TARGET} INTERFACE \${__ratsPackName})"
         )
     endif()
 endfunction()

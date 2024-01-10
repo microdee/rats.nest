@@ -1,0 +1,7 @@
+[submodule "cmake/libs/vcpkg"]
+	path = cmake/libs/vcpkg
+	url = https://github.com/microsoft/vcpkg.git
+[submodule "packs/libs/imgui/repo"]
+	path = packs/libs/imgui/repo
+	url = https://github.com/ocornut/imgui.git
+	branch = docking

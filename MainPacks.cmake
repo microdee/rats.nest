@@ -5,3 +5,5 @@
     
     add_packs(PACKS myProject)
 ]]#
+
+add_packs(PACKS rats.imgui)
