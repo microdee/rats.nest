@@ -9,9 +9,7 @@ function NS.this_pack_name()
 end
 
 function ns:current()
-    return self._stack
-        :__clone()
-        :__array_to_string(".")
+    return string.join(self._stack, ".")
 end
 
 function ns:push(name)
@@ -33,13 +31,13 @@ function NS.get_from_all_scopes(namespace, predicate, getter, default)
     elseif type(namespace) == "table"  then levels = namespace
     end
 
-    local currentNs = levels:__array_to_string(".");
+    local currentNs = string.join(levels, ".");
     local currentNsScope = NS.nsScopes[currentNs];
     if currentNsScope and predicate(currentNs, currentNsScope) then
         return getter(currentNs, currentNsScope)
     end
 
-    return #levels > 1 and NS.get_from_all_scopes(levels:__skip(1), predicate, getter, default) or default
+    return #levels > 1 and NS.get_from_all_scopes(table.skip(levels, 1), predicate, getter, default) or default
 end
 
 function NS.get_fullname(namespace, name)
@@ -57,7 +55,7 @@ end
 function NS.get_scope_value(namespace, name)
     return NS.get_from_all_scopes(
         namespace,
-        function (currentNs, currentNsScope) return currentNsScope[name] end,
+        function (currentNs, currentNsScope) return currentNsScope[name] ~= nil end,
         function (currentNs, currentNsScope) return currentNsScope[name] end
     )
 end
@@ -67,7 +65,9 @@ function ns:get(name)
 end
 
 function ns:enabled()
-    return ns:get("enabled") or true
+    local result = self:get("enabled")
+    if result == nil then return true end
+    return result[1]
 end
 
 function NS.use(args)
@@ -90,8 +90,7 @@ function NS.use(args)
     NS.nsScopes[namespace] = NS.nsScopes[namespace] or {
         _names = {}
     }
-    result._stack = namespace
-        :split(".", {plain = true})
+    result._stack = table.take_until(namespace:split(".", {plain = true}), "_build")
 
     result.scope = NS.nsScopes[namespace]
     return result
