@@ -9,15 +9,15 @@ function NS.this_pack_name()
 end
 
 function ns:current()
-    return string.join(self._stack, ".")
+    return __array_to_string(".")(self._stack)
 end
 
 function ns:push(name)
-    table.append(self._stack, name or NS.this_pack_name())
+    __append(name or NS.this_pack_name())(self._stack)
 end
 
 function ns:pop()
-    table.remove(self._stack, #self._stack)
+    __remove(#self._stack)(self._stack)
 end
 
 function ns:n(name)
@@ -31,13 +31,13 @@ function NS.get_from_all_scopes(namespace, predicate, getter, default)
     elseif type(namespace) == "table"  then levels = namespace
     end
 
-    local currentNs = string.join(levels, ".");
+    local currentNs = __array_to_string(".")(levels);
     local currentNsScope = NS.nsScopes[currentNs];
     if currentNsScope and predicate(currentNs, currentNsScope) then
         return getter(currentNs, currentNsScope)
     end
 
-    return #levels > 1 and NS.get_from_all_scopes(table.skip(levels, 1), predicate, getter, default) or default
+    return #levels > 1 and NS.get_from_all_scopes(__skip(1)(levels), predicate, getter, default) or default
 end
 
 function NS.get_fullname(namespace, name)
@@ -90,7 +90,7 @@ function NS.use(args)
     NS.nsScopes[namespace] = NS.nsScopes[namespace] or {
         _names = {}
     }
-    result._stack = table.take_until(namespace:split(".", {plain = true}), "_build")
+    result._stack = __(namespace:split(".", {plain = true})) | __take_until("_build")
 
     result.scope = NS.nsScopes[namespace]
     return result
