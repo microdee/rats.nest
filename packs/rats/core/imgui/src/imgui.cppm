@@ -15,4 +15,10 @@ namespace rats::core::imgui
             Text("Hello");
         End();
     }
+
+    export struct TestClass
+    {
+        int Foo;
+        int Bar;
+    };
 }

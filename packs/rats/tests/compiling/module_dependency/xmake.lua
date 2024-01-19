@@ -1,20 +1,11 @@
 add_rules("mode.debug", "mode.release")
 
 local ns = NS.use()
-
-add_requires("imgui v1.90-docking", {
-    debug = true,
-    configs = {
-        vulkan = true,
-        freetype = true,
-        vs_runtime = "MT",
-        debug = is_config("debug")
-    }
-})
+local ns_core = NS.use("rats.core")
 
 Rats.target(ns)
     set_kind("shared")
     add_files("src/**.cppm")
-    add_packages("imgui")
+    add_deps(ns_core:n("imgui"))
     set_languages("c++23")
     add_rules("utils.symbols.export_all", {export_classes = true})
