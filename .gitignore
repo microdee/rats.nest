@@ -4,3 +4,5 @@
 /.vscode/compile_commands.json
 /vsxmake*
 /cmake-build-*
+/.vs
+*.pdb

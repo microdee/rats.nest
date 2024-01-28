@@ -13,8 +13,5 @@ add_requires("imgui v1.90-docking", {
 })
 
 Rats.target(ns)
-    set_kind("shared")
-    add_files("src/**.cppm")
-    add_packages("imgui")
-    set_languages("c++23")
-    add_rules("utils.symbols.export_all", {export_classes = true})
+    add_packages("imgui", {public = true})
+    add_options("rats.xmake.cpp_common")
