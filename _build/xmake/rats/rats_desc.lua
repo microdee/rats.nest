@@ -18,8 +18,9 @@ local ns_cpp = NS.use("rats.xmake.cpp")
     The full name of the target will include the namespace e.g.: "rats.core.mytopic.mystuff"
 ]]
 function Rats.target(ns, options)
+    options = options or {}
     local name = options[1] or options.name or NS.this_pack_name()
-    if typeof(name) ~= "string" then
+    if type(name) ~= "string" then
         name = NS.this_pack_name()
     end
     target(ns:n(name), options)
@@ -34,17 +35,37 @@ ns_cpp.scope.windows = {
     }
 }
 
---[[
-    Set up common rats targets for C++23 .
-    control the kind via the third argument (options) so rats can do more magic for you. Default
+--[[--
+    Set up common rats targets for C++23 . Simplest use case scenario:
+
+    -- inside pack/rats/core/imgui/xmake.lua
+
+    -- use namespace "rats.core"
+    local ns = NS.use()
+    -- create a target called "rats.core.imgui"
+    Rats.target_cpp(ns)
+
+    Control the kind via the second argument (options) so rats can do more magic for you. Default
     behavior (options unspecified) is creating a shared library. Use
 
     Rats.target_cpp(ns, { exe = 1 })
+
+    You can still combine it with an explicit target name
+    
+    Rats.target_cpp(ns, { "MyTarget", exe = 1 })
+    -- OR
+    Rats.target_cpp(ns, { name = "MyTarget", exe = 1 })
 
     It automatically includes files from "src" directory. In case of a traditional C++ library
     (not yet compiled with modules) "src/private/**.cpp" is used. If you don't want this use
     
     Rats.target_cpp(ns, { no_files = 1 })
+
+    For C++ modules use
+
+    Rats.target_cpp(ns, { modules = 1 })
+
+    the rest of this documentation considers traditional C++ sources (not modules)
 
     One can expose headers for other libraries from "src/public" folder, but only the owning target
     can use it directly. For other packs header virtualization is used, where header files are
@@ -75,22 +96,36 @@ ns_cpp.scope.windows = {
     To change which header names are virtualized this way use
 
     Rats.target_cpp(ns, { virtual_headers = { expunge = {"foo", "bar"} } })
+
+    Full options:
+    {
+        exe = 1,
+        no_files = 1,
+        modules = 1,
+        no_virtual_headers = 1,
+        virtual_headers = {
+            expunge = {...}
+        },
+        <target options ... >
+    }
 ]]
 function Rats.target_cpp(ns, options)
     options = options or {}
     local name = options[1] or options.name or NS.this_pack_name()
-    if typeof(name) ~= "string" then
+    if type(name) ~= "string" then
         name = NS.this_pack_name()
     end
+
+    set_defaultarchs(
+        "windows|x86_64",
+        "linux|x86_64",
+        "macosx|arm64",
+        "android|arm64"
+    )
+
     Rats.target(ns, name, options)
         set_languages("c++23")
         set_runtimes(ns_cpp.scope.windows.linkage.mode)
-        set_defaultarchs(
-            "windows|x86_64",
-            "linux|x86_64",
-            "macosx|arm64",
-            "android|arm64"
-        )
 
         if options.exe then
             set_kind("binary")
