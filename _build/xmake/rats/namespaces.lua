@@ -1,6 +1,6 @@
 if NS then return end NS = { nsScopes = {} }
 
-includes("table.lua")
+includes("tt.lua")
 
 local ns = ns or {}
 
@@ -9,20 +9,24 @@ function NS.this_pack_name()
 end
 
 function ns:current()
-    return __array_to_string(".")(self._stack)
+    return array_to_string(".")(self._stack)
 end
 
 function ns:push(name)
-    __append(name or NS.this_pack_name())(self._stack)
+    append(name or NS.this_pack_name())(self._stack)
 end
 
 function ns:pop()
-    __remove(#self._stack)(self._stack)
+    remove(#self._stack)(self._stack)
 end
 
 function ns:n(name)
-    self.scope._names[name] = true
-    return self:current() .. "." .. name
+    if name then
+        self.scope._names[name] = true
+        return self:current() .. "." .. name
+    else
+        return self:current()
+    end
 end
 
 function NS.get_from_all_scopes(namespace, predicate, getter, default)
@@ -31,13 +35,13 @@ function NS.get_from_all_scopes(namespace, predicate, getter, default)
     elseif type(namespace) == "table"  then levels = namespace
     end
 
-    local currentNs = __array_to_string(".")(levels);
+    local currentNs = array_to_string(".")(levels);
     local currentNsScope = NS.nsScopes[currentNs];
     if currentNsScope and predicate(currentNs, currentNsScope) then
         return getter(currentNs, currentNsScope)
     end
 
-    return #levels > 1 and NS.get_from_all_scopes(__skip(1)(levels), predicate, getter, default) or default
+    return #levels > 1 and NS.get_from_all_scopes(skip(1)(levels), predicate, getter, default) or default
 end
 
 function NS.get_fullname(namespace, name)
@@ -90,7 +94,7 @@ function NS.use(args)
     NS.nsScopes[namespace] = NS.nsScopes[namespace] or {
         _names = {}
     }
-    result._stack = __(namespace:split(".", {plain = true})) | __take_until("_build")
+    result._stack = tt(namespace:split(".", {plain = true})) | take_until("_build")
 
     result.scope = NS.nsScopes[namespace]
     return result

@@ -48,7 +48,6 @@
     XMake advertises some features which can reduce boilerplate significantly, without imparing
     the freedom CMake provides, like
 
-    * Out of the box C++ modules support
     * Support for multiplé package managers, including their own which also provides dependency
       management
     * Support for multiple languages and their package managers (Rust + Cargo for example)
@@ -67,8 +66,18 @@ rats_globals = {
     paths = {
         root = path.absolute("."),
         packs = path.join(path.absolute("."), "packs")
+    },
+
+    xmake = {
+        modules = path.join(path.absolute("."), "_build", "xmake")
+    },
+
+    windows = {
+        linkage = "MD"
     }
 }
+
+add_moduledirs(rats_globals.xmake.modules)
 
 set_version("0.0.1")
 

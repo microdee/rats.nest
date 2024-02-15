@@ -34,4 +34,29 @@ end
                 print(k)
             end
         end)
+
+    Rats.target(ns, "target")
+        set_kind("phony")
+        on_config(function (t)
+            import("rats.tt")
+            print("--------------------- " .. t:get("group"))
+            print("--------------------- target")
+            local keys = tt(t) | tt.orderkeys()
+
+            for _, k in pairs(keys) do
+                print(k)
+            end
+        end)
+ns:pop()
+
+ns:push("fs")
+    Rats.target(ns, "symlink")
+        set_kind("phony")
+        on_load(function (t)
+            import("rats.rats_os")
+            rats_os.ln(
+                path.join(os.scriptdir(), "linktest"),
+                path.join(os.projectdir(), "_build", "linktest")
+            )
+        end)
 ns:pop()
