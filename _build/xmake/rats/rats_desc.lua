@@ -61,7 +61,8 @@ ns_cpp.scope.windows = {
     #include "rats.core.imgui.widgets.h"
 
     This is obviously a non-problem with properly namespaced C++ modules, but the industry hasn't
-    quite moved to it yet. If you don't want header virtualization this then use
+    quite moved to it yet. If you don't want header virtualization this way, and you want your own
+    way for other rats packs to consume your headers, then use
     
     Rats.target_cpp(ns, { no_virtual_headers = 1 })
 
