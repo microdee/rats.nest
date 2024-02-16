@@ -48,13 +48,13 @@ ns_cpp.scope.windows = {
     Control the kind via the second argument (options) so rats can do more magic for you. Default
     behavior (options unspecified) is creating a shared library. Use
 
-    Rats.target_cpp(ns, { exe = 1 })
+    Rats.target_cpp(ns, { kind = "binary" })
 
     You can still combine it with an explicit target name
     
-    Rats.target_cpp(ns, { "MyTarget", exe = 1 })
+    Rats.target_cpp(ns, { "MyTarget", kind = "binary" })
     -- OR
-    Rats.target_cpp(ns, { name = "MyTarget", exe = 1 })
+    Rats.target_cpp(ns, { name = "MyTarget", kind = "binary" })
 
     It automatically includes files from "src" directory. In case of a traditional C++ library
     (not yet compiled with modules) "src/private/**.cpp" is used. If you don't want this use
@@ -87,26 +87,27 @@ ns_cpp.scope.windows = {
     
     Rats.target_cpp(ns, { no_virtual_headers = 1 })
 
-    One header (by default main.h or _.h) can be made the main header for the module and therefore
-    can be included in other targets as (this is expunged-virtual-header or default-header)
+    One header (by default main.h or _.h) can be made the main/default header for the target and therefore
+    can be included in other targets as:
 
     pack/rats/core/imgui/src/public/_.h
     #include "rats.core.imgui.h"
 
+    (this is expunged-virtual-header or default-header)
     To change which header names are virtualized this way use
 
     Rats.target_cpp(ns, { virtual_headers = { expunge = {"foo", "bar"} } })
 
     Full options:
     {
-        exe = 1,
+        kind = "binary",
         no_files = 1,
         modules = 1,
         no_virtual_headers = 1,
         virtual_headers = {
             expunge = {...}
         },
-        <target options ... >
+        <rest of target options ... >
     }
 ]]
 function Rats.target_cpp(ns, options)
@@ -123,14 +124,13 @@ function Rats.target_cpp(ns, options)
         "android|arm64"
     )
 
+    options.kind = options.kind or "shared"
+
     Rats.target(ns, name, options)
         set_languages("c++23")
         set_runtimes(ns_cpp.scope.windows.linkage.mode)
 
-        if options.exe then
-            set_kind("binary")
-        else
-            set_kind("shared")
+        if options.kind == "shared"
             add_rules("utils.symbols.export_all", {export_classes = true})
         end
 
@@ -142,7 +142,8 @@ function Rats.target_cpp(ns, options)
             if not options.no_files then
                 add_files("src/private/**.cpp")
             end
-            if not options.exe and not options.no_virtual_headers then
+            local is_library = options.kind == "shared" or options.kind == "static"
+            if is_library and not options.no_virtual_headers then
                 options.virtual_headers = options.virtual_headers or {}
                 options.virtual_headers.expunge = options.virtual_headers.expunge or { "_", "main" }
                 
