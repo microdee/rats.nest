@@ -23,6 +23,7 @@ function Rats.target(ns, options)
     if type(name) ~= "string" then
         name = NS.this_pack_name()
     end
+    options.default = type(options.default) == "boolean" and options.default or false;
     target(ns:n(name), options)
         set_group(array_to_string("/")(ns._stack))
         set_enabled(ns:enabled())
@@ -35,7 +36,7 @@ ns_cpp.scope.windows = {
     }
 }
 
---[[--
+--[[
     Set up common rats targets for C++23 . Simplest use case scenario:
 
     -- inside pack/rats/core/imgui/xmake.lua
@@ -118,7 +119,7 @@ function Rats.target_cpp(ns, options)
     end
 
     set_defaultarchs(
-        "windows|x86_64",
+        "windows|x64",
         "linux|x86_64",
         "macosx|arm64",
         "android|arm64"
@@ -126,11 +127,11 @@ function Rats.target_cpp(ns, options)
 
     options.kind = options.kind or "shared"
 
-    Rats.target(ns, name, options)
+    Rats.target(ns, options)
         set_languages("c++23")
         set_runtimes(ns_cpp.scope.windows.linkage.mode)
 
-        if options.kind == "shared"
+        if options.kind == "shared" then
             add_rules("utils.symbols.export_all", {export_classes = true})
         end
 
@@ -152,15 +153,16 @@ function Rats.target_cpp(ns, options)
                 on_config(function (target)
                     import("rats.rats_os")
                     import("rats.tt")
+                    import("rats.rp")
     
-                    local dstdir = "$(buildir)/rats_includes/" .. target:name()
+                    local dstdir = rp("$(buildir)") "rats_includes" (target:name())
                     
-                    try { function() os.mkdir(dstdir) end }
+                    try { function() os.mkdir(dstdir()) end }
     
-                    local public_dir = target:scriptdir() .. "/src/public"
-                    for _, public_header in ipairs(os.files(public_dir .. "/**.h")) do
-                        local header_name = tt(path.split(path.relative(public_header, public_dir)))
-                            | tt.array_to_string(".")
+                    local public_dir = rp(target:scriptdir()) "src" "public"
+                    for _, public_header in ipairs(os.files(public_dir("**.h")())) do
+                        local header_rel = path.relative(public_header, public_dir())
+                        local header_name = tt(path.split(header_rel)) | tt.array_to_string(".")
     
                         local full_name = (target:name() .. "." .. header_name)
                         for _, e in ipairs(options.virtual_headers.expunge) do
@@ -168,7 +170,7 @@ function Rats.target_cpp(ns, options)
                         end
                         rats_os.ln(
                             public_header,
-                            dstdir .. "/" .. full_name
+                            dstdir (full_name) ()
                         )
                     end
                 end)

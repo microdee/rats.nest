@@ -5,7 +5,7 @@ if ns:enabled() then
     print(ns:get("test_text"))
 end
 
-    Rats.target(ns, "path")
+    Rats.target(ns, {"path"})
         set_kind("phony")
         on_config(function (t)
             print("--------------------- " .. t:get("group"))
@@ -15,7 +15,7 @@ end
             end
         end)
 
-    Rats.target(ns, "string")
+    Rats.target(ns, {"string"})
         set_kind("phony")
         on_config(function (t)
             print("--------------------- " .. t:get("group"))
@@ -25,7 +25,7 @@ end
             end
         end)
 
-    Rats.target(ns, "table")
+    Rats.target(ns, {"table"})
         set_kind("phony")
         on_config(function (t)
             print("--------------------- " .. t:get("group"))
@@ -35,7 +35,7 @@ end
             end
         end)
 
-    Rats.target(ns, "target")
+    Rats.target(ns, {"target"})
         set_kind("phony")
         on_config(function (t)
             import("rats.tt")
@@ -50,7 +50,7 @@ end
 ns:pop()
 
 ns:push("fs")
-    Rats.target(ns, "symlink")
+    Rats.target(ns, {"symlink"})
         set_kind("phony")
         on_load(function (t)
             import("rats.rats_os")
