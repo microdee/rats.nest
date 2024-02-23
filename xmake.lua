@@ -61,26 +61,10 @@
 
 set_project("rats")
 
-rats_globals = {
-
-    paths = {
-        root = path.absolute("."),
-        packs = path.join(path.absolute("."), "packs")
-    },
-
-    xmake = {
-        modules = path.join(path.absolute("."), "_build", "xmake")
-    },
-
-    windows = {
-        linkage = "MD"
-    }
-}
-
-add_moduledirs(rats_globals.xmake.modules)
+includes("config.lua")
 
 set_version("0.0.1")
 
-includes("_build/xmake/**.lua")
+includes("_build/xmake/rats/**.lua")
 includes("packs/**/_build/**.lua")
 includes("packs/**/xmake.lua")
