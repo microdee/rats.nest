@@ -8,7 +8,7 @@ add_requires("imgui v1.90.2-docking", {
         shared = true,
         vulkan = true,
         freetype = true,
-        vs_runtime = ns_cpp.scope.windows.linkage.mode,
+        runtimes = ns_cpp.scope.windows.linkage.mode,
         debug = is_config("debug")
     }
 })
