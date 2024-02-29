@@ -39,24 +39,13 @@ extern "C" {
 #endif
 
 /**
- * Determines if the specified path is a valid NTFS symbolic link (reparse point).
+ * Get the number of hard links for the file at the specified path.
+ * https://learn.microsoft.com/en-gb/windows/win32/api/fileapi/nf-fileapi-getfileinformationbyhandle?redirectedfrom=MSDN
  *
- * @param Path The path to verify is a symbolic link.
- * @return Returns true if the specified path is a valid NTFS symbolic link, otherwise false.
+ * @param Path The path to a file.
+ * @return 
  */
-// LIBNTFSLINKS_API bool IsHardlink(LPCTSTR Path);
-// TODO: Get the method of this
-
-/**
- * Retrieves the target path for the specified NTFS symbolic link.
- *
- * @param Path The path of the NTFS symbolic link to retrieve data for.
- * @param TargetPath The buffer to write the symbolic link's target path to. [OUT]
- * @param TargetSize The size of the TargetPath buffer.
- * @return Returns zero if the operation was successful, otherwise a non-zero value if an error occurred.
- */
-// LIBNTFSLINKS_API DWORD GetHardlinkTarget(LPCTSTR Path, LPTSTR TargetPath, size_t TargetSize);
-// TODO: Get the method of this
+LIBNTFSLINKS_API int GetHardlinkCount(LPCTSTR Path);
 
 /**
  * Creates a new NTFS symbolic link at the specified link path which points to the given target path.
@@ -66,15 +55,6 @@ extern "C" {
  * @return Returns zero if the operation was successful, otherwise a non-zero value if an error occurred.
  */
 LIBNTFSLINKS_API DWORD CreateHardlink(LPCTSTR Link, LPCTSTR Target);
-
-/**
- * Deletes an NTFS symbolic link at the specified path location.
- *
- * @param Path The path of the NTFS symbolic link to delete.
- * @return Returns zero if the operation was successful, otherwise a non-zero value if an error occurred.
- */
-// LIBNTFSLINKS_API DWORD DeleteHardlink(LPCTSTR Path);
-// TODO: Get the method of this
 
 
 #ifdef __cplusplus
