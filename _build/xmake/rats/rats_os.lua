@@ -49,19 +49,23 @@ function ln(src, dst, opt)
             elseif libntfslink.IsJunction(dstfix) then
                 libntfslink.DeleteJunction(dstfix)
             else
+                -- TODO: check number of hard links to target, so we can confirm that we can delete it and no data is lost
                 assert(false, dstfix .. " is existing and it wasn't a link.")
             end
         end
-        local success, result = libntfslink.CreateSymlink(dstfix, srcfix);
+        if not _g.windows_symlinks_unsupported then
+            local success, result = libntfslink.CreateSymlink(dstfix, srcfix)
+        end
+
         if not success then
-            print(vformat("failed to create link at %s targeting %s (HRESULT %08X)", dstfix, srcfix, result))
+            print(vformat("Cannot create Symlinks on this system (HRESULT %08X). Using NTFS Hardlinks and Junctions instead.", result))
             if os.isfile(srcfix) then
                 success, result = libntfslink.CreateHardlink(dstfix, srcfix);
             else
                 success, result = libntfslink.CreateJunction(dstfix, srcfix);
             end
         end
-        assert(success, vformat("failed to create link at %s targeting %s (HRESULT %08X)", dstfix, srcfix, result))
+        assert(success, vformat("Failed to create link at %s targeting %s (HRESULT %08X)", dstfix, srcfix, result))
     else
         os.ln(src, dst, opt)
     end
