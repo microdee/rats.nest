@@ -12,6 +12,7 @@ extern "C" {
 #include <lua.h>
 
 LIBNTFSLINKS_API int CreateHardlink_Lua(lua_State* L);
+LIBNTFSLINKS_API int GetHardlinkCount_Lua(lua_State* L);
 
 LIBNTFSLINKS_API int IsJunction_Lua(lua_State* L);
 LIBNTFSLINKS_API int GetJunctionTarget_Lua(lua_State* L);

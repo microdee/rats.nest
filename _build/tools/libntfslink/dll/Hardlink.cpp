@@ -36,6 +36,32 @@
 #include "ntfstypes.h"
 #include "StringUtils.h"
 
+DWORD GetHardlinkCount(LPCTSTR Path, LPDWORD CountOut)
+{
+	DWORD result = (DWORD)E_FAIL;
+	*CountOut = 0;
+
+	// Grab the file attributes of Target. This allows us to determine the target exists but also if it is a file or
+	// directory.
+	DWORD fileAttributes = GetFileAttributes(Path);
+
+	if (fileAttributes == INVALID_FILE_ATTRIBUTES || fileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+	{
+		return E_INVALIDARG;
+	}
+
+	HANDLE fileHandle = CreateFile(Path, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+
+	BY_HANDLE_FILE_INFORMATION fileInfo;
+	if (!GetFileInformationByHandle(fileHandle, &fileInfo))
+	{
+		return GetLastError();
+	}
+
+	*CountOut = fileInfo.nNumberOfLinks;
+	return S_OK;
+}
+
 DWORD CreateHardlink(LPCTSTR Link, LPCTSTR Target)
 {
 	DWORD result = (DWORD)E_FAIL;

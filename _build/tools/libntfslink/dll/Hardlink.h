@@ -45,7 +45,7 @@ extern "C" {
  * @param Path The path to a file.
  * @return 
  */
-LIBNTFSLINKS_API int GetHardlinkCount(LPCTSTR Path);
+LIBNTFSLINKS_API DWORD GetHardlinkCount(LPCTSTR Path, LPDWORD CountOut);
 
 /**
  * Creates a new NTFS symbolic link at the specified link path which points to the given target path.

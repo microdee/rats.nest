@@ -70,6 +70,20 @@ int DeleteLink(lua_State *L, DWORD(*func)(LPCTSTR linkTchar))
     return 2;
 }
 
+int GetHardlinkCount_Lua(lua_State *L)
+{
+    size_t targetLength;
+    const char* target = luaL_checklstring(L, 1, &targetLength);
+    TCHAR targetTchar[MAX_PATH] = {0};
+    CHARtoTCHAR(target, targetLength, targetTchar, MAX_PATH);
+    DWORD count = 0;
+    DWORD result = GetHardlinkCount(targetTchar, &count);
+
+    lua_pushinteger(L, count);
+    lua_pushinteger(L, result);
+    return 2;
+}
+
 int CreateHardlink_Lua(lua_State *L)
 {
     return CreateLink(L, &CreateHardlink);
@@ -119,6 +133,7 @@ int luaopen_libntfslink(lua_State *L)
 {
     static const luaL_Reg funcs [] = {
         {"CreateHardlink", CreateHardlink_Lua},
+        {"GetHardlinkCount", GetHardlinkCount_Lua},
         {"IsJunction", IsJunction_Lua},
         {"GetJunctionTarget", GetJunctionTarget_Lua},
         {"CreateJunction", CreateJunction_Lua},
