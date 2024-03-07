@@ -147,7 +147,7 @@ function NS.use(args)
 
     local basis = options.withPack and path.absolute(".") or path.directory(path.absolute("."))
     local autoNs = basis
-        :replace(rats_globals.paths.packs, "", {plain = true})
+        :replace(-rats_globals.paths.packs, "", {plain = true})
         :replace("\\", ".", {plain = true})
         :replace("/", ".", {plain = true})
         :trim(".")

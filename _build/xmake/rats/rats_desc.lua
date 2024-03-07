@@ -155,13 +155,13 @@ function Rats.target_cpp(ns, options)
                     import("rats.tt")
                     import("rats.rp")
     
-                    local dstdir = rp("$(buildir)") "rats_includes" (target:name())
+                    local dstdir = rp("$(buildir)") / "rats_includes" / target:name()
                     
-                    try { function() os.mkdir(dstdir()) end }
+                    try { function() os.mkdir(-dstdir) end }
     
-                    local public_dir = rp(target:scriptdir()) "src" "public"
-                    for _, public_header in ipairs(os.files(public_dir("**.h")())) do
-                        local header_rel = path.relative(public_header, public_dir())
+                    local public_dir = rp(target:scriptdir()) / "src" / "public"
+                    for _, public_header in ipairs(os.files("" .. public_dir / "**.h")) do
+                        local header_rel = path.relative(public_header, -public_dir)
                         local header_name = tt(path.split(header_rel)) | tt.array_to_string(".")
     
                         local full_name = (target:name() .. "." .. header_name)
@@ -170,7 +170,7 @@ function Rats.target_cpp(ns, options)
                         end
                         rats_os.ln(
                             public_header,
-                            dstdir (full_name) ()
+                            -(dstdir / full_name)
                         )
                     end
                 end)

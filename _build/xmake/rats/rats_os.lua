@@ -9,18 +9,18 @@ function _get_build_tool(name)
     _g.build_tools = _g.build_tools or {}
     if not _g.build_tools[name] then
         -- TODO: make it cross platform
-        local dllPath = rp("$(buildir)") "tools" (name) "windows" "x64" "release" (name .. ".dll") ()
+        local dllPath = rp("$(buildir)") / "tools" / name / "windows" / "x64" / "release" / name .. ".dll"
         if not os.exists(dllPath) then
-            local dllSrc = rp("$(projectdir)") "_build" "tools" (name) ()
+            local dllSrc = rp("$(projectdir)") / "_build" / "tools" / name
             print("Building tool: " .. name)
             os.execv("xmake.exe",
                 {
                     "config",
                     "-P", ".", "-y",
                     "--mode=release",
-                    vformat("--buildir=".. rp("$(buildir)") "tools" (name) ()),
+                    "--buildir=".. rp("$(buildir)") / "tools" / name,
                 },
-                { curdir = dllSrc }
+                { curdir = -dllSrc }
             )
             os.execv("xmake.exe",
                 {
@@ -28,7 +28,7 @@ function _get_build_tool(name)
                     "-P", ".", "-y",
                     name
                 },
-                { curdir = dllSrc }
+                { curdir = -dllSrc }
             )
         end
         assert(os.exists(dllPath), "couldn't compile " .. name)
