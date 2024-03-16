@@ -1,4 +1,10 @@
+------ Common software engineering utilities
 
--- yaml reading
-add_requires("vcpkg:ryml 0.5.0")
-add_requires("vcpkg:c4core 0.1.11")
+add_requires("stringzilla v3.4.1")
+
+local ns = NS.use();
+
+Rats.target_cpp(ns)
+    -- add_packages("ryml", {public = true})
+    -- add_packages("c4core", {public = true})
+    add_packages("stringzilla", {public = true})
