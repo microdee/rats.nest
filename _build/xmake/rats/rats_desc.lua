@@ -142,6 +142,7 @@ function Rats.target_cpp(ns, options)
             add_includedirs("src/private")
             if not options.no_files then
                 add_files("src/private/**.cpp")
+                add_headerfiles("src/**.h", {install = false})
             end
             local is_library = options.kind == "shared" or options.kind == "static"
             if is_library and not options.no_virtual_headers then
@@ -149,6 +150,7 @@ function Rats.target_cpp(ns, options)
                 options.virtual_headers.expunge = options.virtual_headers.expunge or { "_", "main" }
                 
                 add_includedirs("$(buildir)/rats_includes/" .. ns:n(name), {public = true})
+                add_headerfiles("$(buildir)/rats_includes/" .. ns:n(name) .. "/**.h", {install = false})
 
                 on_config(function (target)
                     import("rats.rats_os")

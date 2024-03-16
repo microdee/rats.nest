@@ -1,5 +1,6 @@
 -- extend built in module os
 
+-- only consider script scope
 if import then
 
 import("lib.lua.package")

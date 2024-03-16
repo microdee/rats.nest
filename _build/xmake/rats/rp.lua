@@ -1,6 +1,4 @@
---[[
-    Path extensions for Rats
-]]
+------ Path extensions for Rats
 
 if RatsPath then return end RatsPath = {}
 local rpath = {}
