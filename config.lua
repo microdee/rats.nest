@@ -10,7 +10,9 @@ rats_globals = {
 
         xmake = {
             modules = rp() / "_build" / "xmake",
-            buildir = rp() / ".intermediate" / "build"
+            buildir = rp() / ".intermediate" / "build",
+
+            vcpkg = rp() / "_build" / "tools" / "vcpkg",
         }
     },
 
@@ -24,6 +26,7 @@ rats_globals = {
 -- XMake
 add_moduledirs(-rats_globals.paths.xmake.modules)
 set_config("buildir", -rats_globals.paths.xmake.buildir)
+set_config("vcpkg", -rats_globals.paths.xmake.vcpkg)
 
 -- Windows
 set_config("vs_sdkver", rats_globals.windows.sdk)
