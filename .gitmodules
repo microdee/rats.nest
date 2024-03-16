@@ -2,3 +2,7 @@
 	path = _build/tools/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
 	branch = master
+[submodule "packs/rats/libs/stringzilla/sz"]
+	path = packs/rats/libs/stringzilla/sz
+	url = https://github.com/ashvardanian/StringZilla.git
+	branch = main

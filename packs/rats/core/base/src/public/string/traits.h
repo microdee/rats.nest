@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "stringzilla.hpp"
+#include "stringzilla/stringzilla.hpp"
 
 namespace rats::core::base::string::traits
 {
