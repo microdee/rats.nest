@@ -3,7 +3,7 @@
 
 #include <concepts>
 
-namespace rats::core::base::templates
+namespace rats::core::base::functional
 {
     namespace detail
     {
