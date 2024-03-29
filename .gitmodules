@@ -6,3 +6,7 @@
 	path = packs/rats/libs/stringzilla/sz
 	url = https://github.com/ashvardanian/StringZilla.git
 	branch = main
+[submodule "packs/rats/libs/ryml/ryml"]
+	path = packs/rats/libs/ryml/ryml
+	url = https://github.com/biojppm/rapidyaml.git
+	branch = master
