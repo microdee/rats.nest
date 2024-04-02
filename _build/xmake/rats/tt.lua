@@ -19,6 +19,9 @@ local operand = {}
     tt({1, 2, 3, 4}) | tt.slice(2, 3) | tt.reverse()
 ]]
 function tt(subject)
+    if type(subject) == "nil" then
+        subject = {}
+    end
     if subject.is_tt then return subject end
     if type(subject) == "table" then
         return table.inherit2(subject, operand)
@@ -240,4 +243,36 @@ function array_to_string(separator, default) return function (subject)
         result = result .. separator .. subject[i]
     end
     return result
+end end
+
+function table.default_from(subject, from)
+    subject = subject or {}
+    for k, v in pairs(from) do
+        if type(subject[k]) == "table" and type(v) == "table" then
+            table.default_from(subject[k], v)
+        elseif type(subject[k]) == "nil" then
+            subject[k] = v
+        end
+    end
+    return subject
+end
+
+function default(from) return function (subject)
+    return table.default_from(subject, from)
+end end
+
+function table.merge_from(subject, from)
+    subject = subject or {}
+    for k, v in pairs(from) do
+        if type(subject[k]) == "table" and type(v) == "table" then
+            table.merge_from(subject[k], v)
+        else
+            subject[k] = v
+        end
+    end
+    return subject
+end
+
+function merge(from) return function (subject)
+    return table.merge_from(subject, from)
 end end
