@@ -1,33 +1,9 @@
 ------ common rats specific compiler/build utils
 
-if Rats then return end Rats = rats_globals
+if Rats then return end Rats = rats_globals;
 
 includes("namespaces.lua")
 local ns_cpp = NS.use("rats.xmake.cpp")
-
---[[
-    Set up a common language agnostic target playing "nice" in the rats project model.
-    By default the folder name of the target is used, but optionally this can be overridden either with
-
-    Rats.target(ns, { "mystuff" })
-
-    or with
-
-    Rats.target(ns, { name = "mystuff" })
-
-    The full name of the target will include the namespace e.g.: "rats.core.mytopic.mystuff"
-]]
-function Rats.target(ns, options)
-    options = options or {}
-    local name = options[1] or options.name or NS.this_pack_name()
-    if type(name) ~= "string" then
-        name = NS.this_pack_name()
-    end
-    options.default = type(options.default) == "boolean" and options.default or false;
-    target(ns:n(name), options)
-        set_group(array_to_string("/")(ns._stack))
-        set_enabled(ns:enabled())
-end
 
 ns_cpp.scope.windows = {
     linkage = {
@@ -35,6 +11,61 @@ ns_cpp.scope.windows = {
         mode = is_config("debug") and rats_globals.windows.linkage .. "d" or rats_globals.windows.linkage
     }
 }
+
+function Rats.private_parse_args(arg1, arg2)
+    if type(arg1) == "table" then
+        local options = arg1
+        local name = options.name or NS.this_pack_name()
+        return name, options
+    end
+    if type(arg1) == "string" then
+        local options = arg2 or {}
+        local name = arg1
+        return name, options
+    end
+    return NS.this_pack_name(), {}
+end
+
+function Rats.private_default_options(options, default_in)
+    options = type(options) ~= "table" and {} or options
+    return tt(options) | default(default_in)
+end
+
+function Rats.private_cpp_common()
+    set_languages("c++23")
+    set_runtimes(ns_cpp.scope.windows.linkage.mode)
+end
+
+--[[
+    Set up a common language agnostic target playing "nice" in the rats project model.
+    By default the folder name of the target is used, but optionally this can be overridden either with
+
+    Rats.target(ns, "mystuff")
+
+    or with
+
+    Rats.target(ns, { name = "mystuff" })
+
+    The full name of the target will include the namespace e.g.: "rats.core.mytopic.mystuff"
+
+    Use the implicit first index table element for the options which will be passed to xmake target
+
+    Rats.target(ns, {
+        { kind = "binary" },
+        name = "mystuff"
+    })
+
+    or
+
+    Rats.target(ns, "mystuff", {{ kind = "binary" }} )
+]]
+function Rats.target(ns, arg1, arg2)
+    local name, options = Rats.private_parse_args(arg1, arg2)
+    options = Rats.private_default_options(options, { default = false })
+    target(ns:n(name), options[1])
+        set_group(array_to_string("/")(ns._stack))
+        set_enabled(ns:enabled())
+end
 
 --[[
     Set up common rats targets for C++23 . Simplest use case scenario:
@@ -49,22 +80,27 @@ ns_cpp.scope.windows = {
     Control the kind via the second argument (options) so rats can do more magic for you. Default
     behavior (options unspecified) is creating a shared library. Use
 
-    Rats.target_cpp(ns, { kind = "binary" })
+    Rats.target_cpp(ns, {{ kind = "binary" }} )
 
-    You can still combine it with an explicit target name
+    Notice how it's a table inside another table. The reason is that the table at [1] is the options
+    table which will be fed to xmake targets and the rest is not. This is done because of a design
+    decision in xmake, that unknown elements in the scope options are fatal. So options controlling
+    rats targets had to be separated.
+
+    You can also specify an explicit target name:
     
-    Rats.target_cpp(ns, { "MyTarget", kind = "binary" })
+    Rats.target_cpp(ns, "MyTarget", {{ kind = "binary" }} )
     -- OR
-    Rats.target_cpp(ns, { name = "MyTarget", kind = "binary" })
+    Rats.target_cpp(ns, { {kind = "binary"}, name = "MyTarget" })
 
     It automatically includes files from "src" directory. In case of a traditional C++ library
     (not yet compiled with modules) "src/private/**.cpp" is used. If you don't want this use
     
-    Rats.target_cpp(ns, { no_files = 1 })
+    Rats.target_cpp(ns, { no_files = true })
 
     For C++ modules use
 
-    Rats.target_cpp(ns, { modules = 1 })
+    Rats.target_cpp(ns, { modules = true })
 
     the rest of this documentation considers traditional C++ sources (not modules)
 
@@ -86,7 +122,7 @@ ns_cpp.scope.windows = {
     quite moved to it yet. If you don't want header virtualization this way, and you want your own
     way for other rats packs to consume your headers, then use
     
-    Rats.target_cpp(ns, { no_virtual_headers = 1 })
+    Rats.target_cpp(ns, { no_virtual_headers = true })
 
     One header (by default main.h or _.h) can be made the main/default header for the target and therefore
     can be included in other targets as:
@@ -101,37 +137,32 @@ ns_cpp.scope.windows = {
 
     Full options:
     {
-        kind = "binary",
-        no_files = 1,
-        modules = 1,
-        no_virtual_headers = 1,
+        { kind = "binary" },
+        no_files = true,
+        modules = true,
+        no_virtual_headers = true,
         virtual_headers = {
             expunge = {...}
         },
         <rest of target options ... >
     }
 ]]
-function Rats.target_cpp(ns, options)
-    options = options or {}
-    local name = options[1] or options.name or NS.this_pack_name()
-    if type(name) ~= "string" then
-        name = NS.this_pack_name()
-    end
+function Rats.target_cpp(ns, arg1, arg2)
 
-    set_defaultarchs(
-        "windows|x64",
-        "linux|x86_64",
-        "macosx|arm64",
-        "android|arm64"
-    )
+    local name, options = Rats.private_parse_args(arg1, arg2)
+    options = Rats.private_default_options(options, {
+        { kind = "shared" },
+        virtual_headers = {
+            expunge = { "_", "main" }
+        }
+    })
+    
+    local is_library = options[1].kind == "shared" or options[1].kind == "static"
 
-    options.kind = options.kind or "shared"
+    Rats.target(ns, name, options)
+        Rats.private_cpp_common()
 
-    Rats.target(ns, options)
-        set_languages("c++23")
-        set_runtimes(ns_cpp.scope.windows.linkage.mode)
-
-        if options.kind == "shared" then
+        if options[1].kind == "shared" then
             add_rules("utils.symbols.export_all", {export_classes = true})
         end
 
@@ -144,10 +175,7 @@ function Rats.target_cpp(ns, options)
                 add_files("src/private/**.cpp")
                 add_headerfiles("src/**.h", {install = false})
             end
-            local is_library = options.kind == "shared" or options.kind == "static"
             if is_library and not options.no_virtual_headers then
-                options.virtual_headers = options.virtual_headers or {}
-                options.virtual_headers.expunge = options.virtual_headers.expunge or { "_", "main" }
                 
                 add_includedirs("$(buildir)/rats_includes/" .. ns:n(name), {public = true})
                 add_headerfiles("$(buildir)/rats_includes/" .. ns:n(name) .. "/**.h", {install = false})
@@ -180,3 +208,18 @@ function Rats.target_cpp(ns, options)
         end
 end
 
+add_requires("catch2 " .. rats_globals.catch2.version)
+
+function Rats.target_cpp_tests(ns, arg1, arg2)
+    
+    local name, options = Rats.private_parse_args(arg1, arg2)
+
+    Rats.target(ns, name .. "_tests", options)
+        Rats.private_cpp_common()
+        set_kind("binary")
+        add_deps(ns:n(name))
+        add_packages("catch2")
+        add_files("tests/**.cpp")
+        add_headerfiles("tests/**.h", {install = false})
+        add_tests("default")
+end
