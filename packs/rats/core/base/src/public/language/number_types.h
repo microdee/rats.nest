@@ -19,6 +19,4 @@ namespace rats::core::base::language::number_types
     using fp32 = std::float32_t;
     using fp64 = std::float64_t;
     using fp128 = std::float128_t;
-
-    using bf16 = std::bfloat16_t;
 }

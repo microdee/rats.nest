@@ -25,4 +25,22 @@ namespace rats::core::base::string::extensions
     {
         return ls | "/"_sz | rs;
     }
+
+    /** Use it via `myString % DefaultOrEmpty("None"_sz) */
+    auto DefaultOnEmpty(const sz::string_view& rs)
+    {
+        return [&rs](const sz::string_view& ls)
+        {
+            return ls.length() == 0 ? rs : ls;
+        };
+    }
+
+    /** Use it via `myString % DefaultOrEmpty("None"_sz) */
+    auto DefaultOnWhitespace(const sz::string_view& rs)
+    {
+        return [&rs](const sz::string_view& ls)
+        {
+            return ls.length() == 0 || ls.is_space() ? rs : ls;
+        };
+    }
 }
