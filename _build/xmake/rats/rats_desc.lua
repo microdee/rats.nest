@@ -68,7 +68,7 @@ function Rats.target(ns, arg1, arg2)
 end
 
 --[[
-    Set up common rats targets for C++23 . Simplest use case scenario:
+    Set up common rats targets for C++. Simplest use case scenario:
 
     -- inside pack/rats/core/imgui/xmake.lua
 
@@ -78,7 +78,7 @@ end
     Rats.target_cpp(ns)
 
     Control the kind via the second argument (options) so rats can do more magic for you. Default
-    behavior (options unspecified) is creating a shared library. Use
+    behavior (options unspecified) is creating a shared library. For executables, use
 
     Rats.target_cpp(ns, {{ kind = "binary" }} )
 
@@ -137,14 +137,16 @@ end
 
     Full options:
     {
-        { kind = "binary" },
+        {
+            kind = "binary",
+            <rest of target options ... >
+        },
         no_files = true,
         modules = true,
         no_virtual_headers = true,
         virtual_headers = {
             expunge = {...}
-        },
-        <rest of target options ... >
+        }
     }
 ]]
 function Rats.target_cpp(ns, arg1, arg2)

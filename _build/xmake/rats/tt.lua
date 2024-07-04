@@ -8,7 +8,7 @@ local operand = {}
     this function gives any tables common operator overloads:
     
     ### | (__bor) -> piping
-    Feed the left side operand table into a right side operand function
+    Feed the left side operand table into a right side operand function (mimmicking UFCS)
 
     In Description scope:
     includes("rats/tt.lua")
