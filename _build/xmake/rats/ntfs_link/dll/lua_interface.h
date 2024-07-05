@@ -24,8 +24,6 @@ LIBNTFSLINKS_API int GetSymlinkTarget_Lua(lua_State* L);
 LIBNTFSLINKS_API int CreateSymlink_Lua(lua_State* L);
 LIBNTFSLINKS_API int DeleteSymlink_Lua(lua_State* L);
 
-LIBNTFSLINKS_API int luaopen_libntfslink(lua_State* L);
-
 #ifdef __cplusplus
 }
 #endif

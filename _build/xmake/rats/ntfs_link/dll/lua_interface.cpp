@@ -129,7 +129,7 @@ int DeleteSymlink_Lua(lua_State *L)
     return DeleteLink(L, &DeleteSymlink);
 }
 
-int luaopen_libntfslink(lua_State *L)
+int luaopen(ntfs_link, lua_State *L)
 {
     static const luaL_Reg funcs [] = {
         {"CreateHardlink", CreateHardlink_Lua},
