@@ -5,7 +5,7 @@ third-party:
     project: https://github.com/biojppm/rapidyaml
     authors:
         - "jpmag (https://github.com/biojppm)"
-    license: MIT (https://github.com/biojppm/rapidyaml/blob/master/LICENSE.txt)
+    license: MIT License (https://github.com/biojppm/rapidyaml/blob/master/LICENSE.txt)
     reasoning: |
         Fast YAML and JSON parsing. In rats apps YAML is a preferred serialization method having a
         modern/fast C++ parser helps a lot.
@@ -31,7 +31,7 @@ third-party:
     project: https://github.com/biojppm/c4core
     authors:
         - "jpmag (https://github.com/biojppm)"
-    license: MIT (https://github.com/biojppm/c4core/blob/master/LICENSE.txt)
+    license: MIT License (https://github.com/biojppm/c4core/blob/master/LICENSE.txt)
     reasoning: Has some useful utilities, and comes included with Rapid YAML.
 ]]
 

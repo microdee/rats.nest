@@ -1,0 +1,27 @@
+$schema: http://json-schema.org/draft-04/schema#
+$id: rats/thirdparty-justification.schema.yml
+title: Third-Party Component Justification
+description: |
+  A notation for easy discovery of third-party components to be collected later into attribution documents
+tpye: object
+properties:
+  third-party:
+    type: object
+    description: 
+    properties:
+      name: { type: string }
+      source: { type: string }
+      project: { type: string }
+      authors:
+        type: array
+        items: { type: string }
+        minItems: 1
+        uniqueItems: true
+      license: { type: string }
+      reasoning: { type: string }
+      notes: { type: string }
+    required:
+      - name
+      - authors
+      - license
+      - reasoning
