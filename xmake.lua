@@ -53,6 +53,8 @@
     * Support for multiple languages and their package managers (Rust + Cargo for example)
     * Handholding for cross-compiling
 
+    All of which I found painful to handle in CMake or alternatives.
+
     # License
 
     Mozilla Public License Version 2.0
