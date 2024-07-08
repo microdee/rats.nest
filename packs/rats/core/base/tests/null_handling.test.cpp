@@ -20,11 +20,11 @@ struct NestedObject
 TEST_CASE("Null handling operator", "[null_handling]")
 {
     NullableObject* nulled = nullptr;
-    int propagationFailure = nulled || [](NullableObject& $) { return $.X; };
+    int propagationFailure = nulled / [](NullableObject& $) { return $.X; };
     CHECK(propagationFailure == int{});
     
     NullableObject valid {};
     NullableObject* validPtr = &valid;
-    int propagationSuccess = validPtr || [](NullableObject& $) { return $.X; };
+    int propagationSuccess = validPtr / [](NullableObject& $) { return $.X; };
     CHECK(propagationSuccess == 2);
 }
