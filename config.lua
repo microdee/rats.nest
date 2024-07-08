@@ -16,10 +16,14 @@ rats_globals = {
         }
     },
 
+    cpp = {
+        version = "c++23"
+    },
+
     windows = {
         linkage = "MD",
-        sdk = "10.0.19041.0",
-        vs = "2019"
+        sdk = "10.0.22621.0",
+        vs = "2022"
     },
 
     catch2 = {
@@ -31,6 +35,9 @@ rats_globals = {
 add_moduledirs(-rats_globals.paths.xmake.modules)
 set_config("buildir", -rats_globals.paths.xmake.buildir)
 set_config("vcpkg", -rats_globals.paths.xmake.vcpkg)
+
+-- C++
+set_config("cpp", rats_globals.cpp.version)
 
 -- Windows
 set_config("vs_sdkver", rats_globals.windows.sdk)
