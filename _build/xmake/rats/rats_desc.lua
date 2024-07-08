@@ -7,8 +7,8 @@ local ns_cpp = NS.use("rats.xmake.cpp")
 
 ns_cpp.scope.windows = {
     linkage = {
-        mode_plain = rats_globals.windows.linkage,
-        mode = is_config("debug") and rats_globals.windows.linkage .. "d" or rats_globals.windows.linkage
+        mode_plain = Rats.windows.linkage,
+        mode = is_config("debug") and Rats.windows.linkage .. "d" or Rats.windows.linkage
     }
 }
 
@@ -32,7 +32,7 @@ function Rats.private_default_options(options, default_in)
 end
 
 function Rats.private_cpp_common()
-    set_languages("c++23")
+    set_languages(Rats.cpp.version)
     set_runtimes(ns_cpp.scope.windows.linkage.mode)
 end
 
@@ -94,7 +94,7 @@ end
     Rats.target_cpp(ns, { {kind = "binary"}, name = "MyTarget" })
 
     It automatically includes files from "src" directory. In case of a traditional C++ library
-    (not yet compiled with modules) "src/private/**.cpp" is used. If you don't want this use
+    (not yet compiled with modules) "src/**.cpp" is used. If you don't want this use
     
     Rats.target_cpp(ns, { no_files = true })
 
@@ -174,7 +174,7 @@ function Rats.target_cpp(ns, arg1, arg2)
             add_includedirs("src/public")
             add_includedirs("src/private")
             if not options.no_files then
-                add_files("src/private/**.cpp")
+                add_files("src/**.cpp")
                 add_headerfiles("src/**.h", {install = false})
             end
             if is_library and not options.no_virtual_headers then
@@ -210,7 +210,7 @@ function Rats.target_cpp(ns, arg1, arg2)
         end
 end
 
-add_requires("catch2 " .. rats_globals.catch2.version)
+add_requires("catch2 " .. Rats.catch2.version)
 
 function Rats.target_cpp_tests(ns, arg1, arg2)
     
