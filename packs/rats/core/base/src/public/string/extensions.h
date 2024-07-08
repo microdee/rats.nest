@@ -9,7 +9,6 @@
 namespace rats::core::base::string::extensions
 {
     using namespace rats::core::base::string::traits;
-    using namespace rats::core::base::language::extension_methods;
 
     namespace sz = ashvardanian::stringzilla;
     using namespace sz::literals;
@@ -26,8 +25,8 @@ namespace rats::core::base::string::extensions
         return ls | "/"_sz | rs;
     }
 
-    /** Use it via `myString % DefaultOrEmpty("None"_sz) */
-    auto DefaultOnEmpty(const sz::string_view& rs)
+    /** Use it via `myString % OnEmpty("None"_sz) */
+    auto OnEmpty(const sz::string_view& rs)
     {
         return [&rs](const sz::string_view& ls)
         {
@@ -35,8 +34,8 @@ namespace rats::core::base::string::extensions
         };
     }
 
-    /** Use it via `myString % DefaultOrEmpty("None"_sz) */
-    auto DefaultOnWhitespace(const sz::string_view& rs)
+    /** Use it via `myString % OnWhitespace("None"_sz) */
+    auto OnWhitespace(const sz::string_view& rs)
     {
         return [&rs](const sz::string_view& ls)
         {
