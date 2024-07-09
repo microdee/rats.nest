@@ -17,7 +17,7 @@ struct NestedObject
     int Payload = 3;
 };
 
-TEST_CASE("Null handling operator", "[null_handling]")
+TEST_CASE("Null handling operator", "[rats.core.base][null_handling]")
 {
     NullableObject* nulled = nullptr;
     int propagationFailure = nulled / [](NullableObject& $) { return $.X; };
