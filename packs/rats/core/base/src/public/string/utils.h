@@ -4,11 +4,12 @@
 #include <functional>
 
 #include "rats.core.base.string.traits.h"
-#include "rats.core.base.language.extension_methods.h"
+#include "rats.core.base.language.infixing.h"
 
-namespace rats::core::base::string::extensions
+namespace rats::core::base::string::utils
 {
     using namespace rats::core::base::string::traits;
+    using namespace rats::core::base::language::infixing;
 
     namespace sz = ashvardanian::stringzilla;
     using namespace sz::literals;
@@ -25,21 +26,15 @@ namespace rats::core::base::string::extensions
         return ls | "/"_sz | rs;
     }
 
-    /** Use it via `myString % OnEmpty("None"_sz) */
-    auto OnEmpty(const sz::string_view& rs)
+    template <StringOrView String, typename... ConcatenationArgs>
+    auto operator / (String&& rs, sz::concatenation<ConcatenationArgs...>&& ls)
     {
-        return [&rs](const sz::string_view& ls)
-        {
-            return ls.length() == 0 ? rs : ls;
-        };
+        return ls | "/"_sz | rs;
     }
 
+    /** Use it via `myString % OnEmpty("None"_sz) */
+    auto OnEmpty(const sz::string_view& rs) -> Infixed<sz::string_view, const sz::string_view&>;
+
     /** Use it via `myString % OnWhitespace("None"_sz) */
-    auto OnWhitespace(const sz::string_view& rs)
-    {
-        return [&rs](const sz::string_view& ls)
-        {
-            return ls.length() == 0 || ls.is_space() ? rs : ls;
-        };
-    }
+    auto OnWhitespace(const sz::string_view& rs) -> Infixed<sz::string_view, const sz::string_view&>;
 }
