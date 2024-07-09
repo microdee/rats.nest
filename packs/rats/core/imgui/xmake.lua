@@ -1,3 +1,5 @@
+------ Use ImGui and provide common utilities (such as RAII widget stack wrappers)
+
 add_rules("mode.debug", "mode.release")
 
 local ns = NS.use()
