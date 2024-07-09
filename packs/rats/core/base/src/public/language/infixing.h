@@ -56,4 +56,22 @@ namespace rats::core::base::language::infixing
     {
         return rs(ls);
     }
+
+    /**
+     * @brief  shortening alias for creating an infixable function use as
+     * 
+     *         ```
+     *         auto MyFunction() -> Infixed<size_t, const sz::string&>
+     *         {
+     *             return [](const sz::string& ls) { return ls.size(); };
+     *         }
+     *         ```
+     * 
+     *         However, this is only necessary when declaration and definition is separated.
+     * 
+     * @tparam Return  the return type of the returned function 
+     * @tparam Left 
+     */
+    template <typename Return, typename Left>
+    using Infixed = std::move_only_function<Return(Left)>;
 }
