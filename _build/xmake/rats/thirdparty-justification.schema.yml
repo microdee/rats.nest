@@ -20,6 +20,11 @@ properties:
       license: { type: string }
       reasoning: { type: string }
       notes: { type: string }
+      references:
+        type: array
+        items: { type: string }
+        minItems: 1
+        uniqueItems: true
     required:
       - name
       - authors
