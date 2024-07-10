@@ -15,6 +15,6 @@ TEST_CASE("Path concatenation", "[rats.core.base][strings]")
 
 TEST_CASE("Defaulting", "[rats.core.base][strings]")
 {
-    CHECK_THAT((""_sz % OnEmpty("foo"_sz)), Equals("foo"_sz));
-    CHECK_THAT(("   \n"_sz % OnWhitespace("foo"_sz)), Equals("foo"_sz));
+    CHECK_THAT((""_sz > _(OnEmpty, "foo"_sz)), Equals("foo"_sz));
+    CHECK_THAT(("   \n"_sz > _(OnWhitespace, "foo"_sz)), Equals("foo"_sz));
 }

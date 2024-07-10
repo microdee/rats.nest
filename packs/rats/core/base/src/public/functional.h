@@ -4,11 +4,15 @@
 #include <concepts>
 #include <tuple>
 
+#include "rats.core.base.tuples.h"
+
 /**
  * this namespace contains functional templates, concepts and usual lambda calculus helpers
  */
 namespace rats::core::base::functional
 {
+    using namespace rats::core::base::tuples;
+
     /** Concept constraining input T to a lambda function or a functor object. */
     template <typename T>
     concept FunctorObject = requires { &T::operator(); };
@@ -18,10 +22,10 @@ namespace rats::core::base::functional
         template <bool IsMemberFunctionIn, bool IsConstIn, typename ReturnIn, typename... Args>
         struct FunctionMeta
         {
-            static constexpr size_t ArgumentCount = sizeof...(Args),
+            static constexpr size_t ArgumentCount = sizeof...(Args);
 
             /** Is the function a member of a type */
-            static constexpr bool IsMember = IsMemberFunctionIn,
+            static constexpr bool IsMember = IsMemberFunctionIn;
             
             /** Is the function marked const on a type */
             static constexpr bool IsConst = IsConstIn;
@@ -95,7 +99,7 @@ namespace rats::core::base::functional
     using Function_ArgDecay = typename FunctionTraits<T>::template ArgDecay<I>;
 
     template <typename T>
-    inline constexpr size_t Function_ArgCouunt = FunctionTraits<T>::ArgumentCount;
+    inline constexpr size_t Function_ArgCount = FunctionTraits<T>::ArgumentCount;
 
     template <typename T>
     using Function_Return = typename FunctionTraits<T>::Return;
@@ -113,6 +117,7 @@ namespace rats::core::base::functional
     template <typename T>
     concept FunctionLike = FunctionTraits<T>::IsFunction;
 
+    // TODO: faulty, check conversion of arguments instead
     /** Given function shall only accept given arguments */
     template <typename Function, typename... Args>
     concept AcceptsOnly = FunctionLike<Function>
@@ -122,6 +127,7 @@ namespace rats::core::base::functional
         >
     ;
 
+    // TODO: faulty, check conversion of arguments instead
     /** Given function shall only accept given arguments with given qualifiers */
     template <typename Function, typename... Args>
     concept AcceptsPrecisely = FunctionLike<Function>
@@ -131,7 +137,72 @@ namespace rats::core::base::functional
         >
     ;
 
+    // TODO: faulty, check conversion of arguments instead
     /** Given function pure signature shall match the given signature */
     template <typename Function, typename Signature>
     concept SignatureCompatible = std::same_as<typename FunctionTraits<Function>::Signature, Signature>;
+
+    namespace detail
+    {
+        template<typename Function, size_t... Sequence>
+        typename FunctionTraits<Function>::Return ApplyImplementation(
+            Function&& function,
+            const typename FunctionTraits<Function>::Arguments& arguments,
+            std::index_sequence<Sequence...>&&
+        )
+        {
+            return function(arguments.template Get<Sequence>()...);
+        }
+
+        template<typename Function, size_t... Sequence>
+        typename FunctionTraits<Function>::Return ApplyImplementation(
+            const Function& function,
+            const typename FunctionTraits<Function>::Arguments& arguments,
+            std::index_sequence<Sequence...>&&
+        )
+        {
+            return function(arguments.template Get<Sequence>()...);
+        }
+    }
+
+	/**
+	 * A clone of std::apply for Unreal tuples which also supports function pointers.
+	 * TL;DR: It calls a function with arguments supplied from a tuple.
+	 */
+	template<typename Function>
+	typename FunctionTraits<Function>::Return Apply(Function&& function, const typename FunctionTraits<Function>::Arguments& arguments)
+	{
+		return detail::ApplyImplementation(
+            Forward<Function>(function), arguments, std::make_index_sequence<FunctionTraits<Function>::ArgumentCount>()
+        );
+	}
+
+	/**
+	 * A clone of std::apply for Unreal tuples which also supports function pointers.
+	 * TL;DR: It calls a function with arguments supplied from a tuple.
+	 */
+	template<typename Function>
+	typename FunctionTraits<Function>::Return Apply(const Function& function, const typename FunctionTraits<Function>::Arguments& arguments)
+	{
+		return detail::ApplyImplementation(
+            function, arguments, std::make_index_sequence<FunctionTraits<Function>::ArgumentCount>()
+        );
+	}
+
+    template <typename Return, typename Tuple, size_t... Indices>
+    using FunctionPtrFromTupleIndices = Return(*)(std::tuple_element_t<Indices, Tuple>...);
+
+    template <typename Return, typename Tuple>
+    struct FunctionPtrFromTuple
+    {
+        template <size_t... Indices>
+        static consteval FunctionPtrFromTupleIndices<Return, Tuple, Indices...> Compose(std::index_sequence<Indices...>&&);
+
+        using type = decltype(
+            Compose(std::make_index_sequence<std::tuple_size_v<Tuple>>{})
+        );
+    };
+
+    template <typename Return, typename Tuple>
+    using FunctionPtrFromTuple_t = typename FunctionPtrFromTuple<Return, Tuple>::type;
 }

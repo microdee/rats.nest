@@ -32,9 +32,6 @@ namespace rats::core::base::string::utils
         return ls | "/"_sz | rs;
     }
 
-    /** Use it via `myString % OnEmpty("None"_sz) */
-    auto OnEmpty(const sz::string_view& rs) -> Infixed<sz::string_view, const sz::string_view&>;
-
-    /** Use it via `myString % OnWhitespace("None"_sz) */
-    auto OnWhitespace(const sz::string_view& rs) -> Infixed<sz::string_view, const sz::string_view&>;
+    sz::string_view OnEmpty(const sz::string_view& ls, const sz::string_view& rs);
+    sz::string_view OnWhitespace(const sz::string_view& ls, const sz::string_view& rs);
 }
