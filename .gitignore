@@ -2,6 +2,7 @@
 .xmake
 /build
 /.vscode/compile_commands.json
+/.vscode/settings.json
 /vsxmake*
 /cmake-build-*
 /.vs

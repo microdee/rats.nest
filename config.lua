@@ -1,5 +1,6 @@
 
 includes("_build/xmake/rats/rp.lua")
+includes("_build/xmake/rats/namespaces.lua")
 
 rats_globals = {
 
@@ -31,6 +32,15 @@ rats_globals = {
     }
 }
 
+-- namespaced configs
+local ns_cpp = NS.use("rats.xmake.cpp")
+ns_cpp.scope.windows = {
+    linkage = {
+        mode_plain = rats_globals.windows.linkage,
+        mode = is_config("debug") and rats_globals.windows.linkage .. "d" or rats_globals.windows.linkage
+    }
+}
+
 -- XMake
 add_moduledirs(-rats_globals.paths.xmake.modules)
 set_config("buildir", -rats_globals.paths.xmake.buildir)
@@ -49,3 +59,9 @@ set_defaultarchs(
     "macosx|arm64",
     "android|arm64"
 )
+
+add_requires("catch2 " .. rats_globals.catch2.version, {
+    configs = {
+        runtimes = ns_cpp.scope.windows.linkage.mode,
+    }
+})

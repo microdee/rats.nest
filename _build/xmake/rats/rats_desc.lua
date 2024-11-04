@@ -3,14 +3,8 @@
 if Rats then return end Rats = rats_globals;
 
 includes("namespaces.lua")
-local ns_cpp = NS.use("rats.xmake.cpp")
 
-ns_cpp.scope.windows = {
-    linkage = {
-        mode_plain = Rats.windows.linkage,
-        mode = is_config("debug") and Rats.windows.linkage .. "d" or Rats.windows.linkage
-    }
-}
+local ns_cpp = NS.use("rats.xmake.cpp")
 
 function Rats.private_parse_args(arg1, arg2)
     if type(arg1) == "table" then
@@ -34,6 +28,7 @@ end
 function Rats.private_cpp_common()
     set_languages(Rats.cpp.version)
     set_runtimes(ns_cpp.scope.windows.linkage.mode)
+    add_cxxflags("cl::/diagnostics:caret")
 end
 
 --[[
@@ -144,6 +139,7 @@ end
         no_files = true,
         modules = true,
         no_virtual_headers = true,
+        header_only = true,
         virtual_headers = {
             expunge = {...}
         }
@@ -172,9 +168,13 @@ function Rats.target_cpp(ns, arg1, arg2)
             add_files("src/**.cppm")
         else
             add_includedirs("src/public")
-            add_includedirs("src/private")
+            if not options.header_only then
+                add_includedirs("src/private")
+            end
             if not options.no_files then
-                add_files("src/**.cpp")
+                if not options.header_only then
+                    add_files("src/**.cpp")
+                end
                 add_headerfiles("src/**.h", {install = false})
             end
             if is_library and not options.no_virtual_headers then
@@ -210,8 +210,6 @@ function Rats.target_cpp(ns, arg1, arg2)
         end
 end
 
-add_requires("catch2 " .. Rats.catch2.version)
-
 function Rats.target_cpp_tests(ns, arg1, arg2)
     
     local name, options = Rats.private_parse_args(arg1, arg2)
@@ -219,6 +217,7 @@ function Rats.target_cpp_tests(ns, arg1, arg2)
     Rats.target(ns, name .. "_tests", options)
         Rats.private_cpp_common()
         set_kind("binary")
+        set_default(false)
         add_deps(ns:n(name))
         add_packages("catch2")
         add_files("tests/**.cpp")

@@ -2,9 +2,8 @@
 
 #include "rats.core.base.h"
 
-import std;
-
 using namespace rats::core::base;
+using namespace Catch::Matchers;
 
 TEST_CASE("Path concatenation", "[rats.core.base][strings]")
 {
