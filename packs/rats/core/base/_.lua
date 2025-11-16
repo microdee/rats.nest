@@ -4,6 +4,7 @@ add_rules("mode.debug", "mode.release")
 
 local ns = NS.use()
 
+add_requires("ctre")
 add_requires("reflect-cpp v0.20.0", {
     configs = Rats.requires // {
         yaml = true,
@@ -15,4 +16,10 @@ add_requires("reflect-cpp v0.20.0", {
 })
 
 Rats.target_cpp(ns)
-    add_packages("reflect-cpp", { public = true })
+    add_packages(
+        "reflect-cpp",
+        "ctre",
+        { public = true }
+    )
+
+Rats.target_cpp_tests(ns)
