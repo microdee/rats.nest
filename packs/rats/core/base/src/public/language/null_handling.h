@@ -3,21 +3,18 @@
 #include <concepts>
 
 #include "rats.core.base.language.concepts.h"
-#include "rats.core.base.functional.h"
+#include "rats.core.base.language.function_traits.h"
 
 /**
  * This namespace contains utilities for handling optional types (naked pointers, std::optional,
  * std::shared_ptr, etc...) in a comfortable manner
  */
-namespace rats::core::base::language::null_handling
+namespace rats
 {
-    using namespace rats::core::base::functional;
-    using namespace rats::core::base::language::concepts;
-
     /** Optional propagating / operator */
     template <
-        OptionalLike Left,
-        AcceptsOnly<decltype(*std::declval<Left>)> Function
+        COptionalLike Left,
+        CFunctionCompatible_Arguments<void(Left&&)> Function
     >
     constexpr Function_Return<Function> operator / (const Left& ls, const Function& rs)
     {

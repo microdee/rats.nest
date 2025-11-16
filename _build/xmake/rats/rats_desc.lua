@@ -4,8 +4,6 @@ if Rats then return end Rats = rats_globals;
 
 includes("namespaces.lua")
 
-local ns_cpp = NS.use("rats.xmake.cpp")
-
 function Rats.private_parse_args(arg1, arg2)
     if type(arg1) == "table" then
         local options = arg1
@@ -27,7 +25,7 @@ end
 
 function Rats.private_cpp_common()
     set_languages(Rats.cpp.version)
-    set_runtimes(ns_cpp.scope.windows.linkage.mode)
+    set_runtimes(Rats.windows.runtime)
     add_cxxflags("cl::/diagnostics:caret")
 end
 

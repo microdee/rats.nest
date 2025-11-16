@@ -1,11 +1,12 @@
 #pragma once
 
 #include <concepts>
+#include "rats.core.base.language.convenience.h"
 
-namespace rats::core::base::language::concepts
+namespace rats
 {
     template<typename T>
-    concept BooleanTestable = std::convertible_to<T, bool>
+    concept CBooleanTestable = std::convertible_to<T, bool>
         && requires(T&& t)
         {
             { !Forward<T>(t) } -> std::convertible_to<bool>;
@@ -13,8 +14,11 @@ namespace rats::core::base::language::concepts
     ;
 
     template <typename T>
-    concept Derefable = requires(T t) { *t; };
+    concept CDerefable = requires(T t) { *t; };
 
     template <typename T>
-    concept OptionalLike = Derefable<T> && BooleanTestable<T>;
+    concept COptionalLike = CDerefable<T> && CBooleanTestable<T>;
+
+    template <typename T>
+    concept CVoid = $::same_as<T, void>;
 }

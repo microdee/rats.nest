@@ -9,6 +9,9 @@ local operand = {}
     
     ### | (__bor) -> piping
     Feed the left side operand table into a right side operand function (mimmicking UFCS)
+    
+    ### // (__idiv) -> merge a clone
+    Clone the left side table and merge the right side one into that clone
 
     In Description scope:
     includes("rats/tt.lua")
@@ -40,6 +43,10 @@ function operand.is_tt() return true end
 
 function operand.__bor(subject, value)
     return value(subject)
+end
+
+function operand.__idiv(left, right)
+    return table.merge_from(table.clone(left, -1), right)
 end
 
 function clear() return function (subject)
