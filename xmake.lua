@@ -69,4 +69,4 @@ set_version("0.0.1")
 
 includes("_build/xmake/rats/**.lua")
 includes("packs/**/_build/**.lua")
-includes("packs/**/_.lua")
+includes("packs/**/*.xm.lua")
